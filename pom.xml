@@ -3,12 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <groupId>io.github.timemachinelab</groupId>
-    <artifactId>TMLSdk</artifactId>
+    <artifactId>TmlFoundation</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>TMLSdk</name>
-    <description>TMLSdk</description>
+    <name>TmlFoundation</name>
+    <description>TmlFoundation</description>
 
     <properties>
         <java.version>11</java.version>
@@ -33,7 +32,7 @@
     </dependencies>
 
     <url>
-        https://github.com/Time-Machine-Lab/TMLSdk.git
+        https://github.com/Time-Machine-Lab/TmlFoundation.git
     </url>
     <licenses>
         <license>
