@@ -6,8 +6,14 @@
     <groupId>io.github.timemachinelab</groupId>
     <artifactId>TmlFoundation</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>TmlFoundation</name>
     <description>TmlFoundation</description>
+
+    <modules>
+        <module>tml-sdk-java-core</module>
+        <module>tml-sdk-java-web</module>
+    </modules>
 
     <properties>
         <java.version>11</java.version>
