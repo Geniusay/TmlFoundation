@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TimeWheel {
 
+    private TimeTicker timeTicker;
+
     // the time unit of the time wheel
     private TimeUnit timeUnit;
 
