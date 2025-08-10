@@ -1,4 +1,7 @@
 package io.github.timemachinelab.util;
 
-public interface Beta {
+/**
+ * Unstable, unverified code or components
+ */
+public @interface Beta {
 }
