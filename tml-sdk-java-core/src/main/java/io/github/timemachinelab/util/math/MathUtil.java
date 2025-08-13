@@ -12,6 +12,6 @@ public class MathUtil {
      * @return mid-value
      */
     public static int mid(int l, int r){
-        return l + (r - l)>>1;
+        return l + ((r - l)>>1);
     }
 }

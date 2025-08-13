@@ -41,8 +41,9 @@ public class SegmentTree<T,V> implements RMQ<V>{
     }
 
     private void buildTree(List<T> list, int l, int r, int idx){
-        if(l == r){
+        if(l >= r){
             st[idx] = new StNode<>(vc.calculate(list.get(l)));
+            return;
         }
         int mid = MathUtil.mid(l, r);
         buildTree(list, l, mid, leftIdx(idx));
@@ -56,6 +57,14 @@ public class SegmentTree<T,V> implements RMQ<V>{
 
     public static SegmentTree<Long,Long> forLong(List<Long> list){
         return new SegmentTree<>(list, (ValueCalculation<Long, Long>) (t)-> t, Comparator.naturalOrder());
+    }
+
+    public static SegmentTree<Double,Double> forDouble(List<Double> list){
+        return new SegmentTree<>(list, (ValueCalculation<Double, Double>) (t)-> t, Comparator.naturalOrder());
+    }
+
+    public static SegmentTree<Float,Float> forFloat(List<Float> list){
+        return new SegmentTree<>(list, (ValueCalculation<Float, Float>) (t)-> t, Comparator.naturalOrder());
     }
 
     private void upperNode(int idx){
@@ -99,7 +108,7 @@ public class SegmentTree<T,V> implements RMQ<V>{
         int mid = MathUtil.mid(x, y);
         int lIdx = -1; int rIdx = -1;
 
-        if(mid<=l){
+        if(mid >= l){
             lIdx = queryRange(leftIdx(idx), x, mid, l, r, isMax);
         }
         if(r>mid){
