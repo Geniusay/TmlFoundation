@@ -134,7 +134,7 @@ public class SegmentTree<T,V> implements RMQ<V>{
         if(index < 0 || index >= len){
             return false;
         }
-        update(ROOT_IDX, index, 0, len, value);
+        update(ROOT_IDX, 0, len-1, index, value);
         return true;
     }
 

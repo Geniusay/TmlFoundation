@@ -5,8 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static io.github.timemachinelab.common.constant.HttpCode.ERROR;
+import static io.github.timemachinelab.common.constant.HttpCode.SUCCESS;
+import static io.github.timemachinelab.common.constant.HttpStatus.INTERNAL_SERVER_ERROR;
+import static io.github.timemachinelab.common.constant.HttpStatus.OK;
+
 /**
- * 企业级HTTP响应结果类
+ * HTTP响应结果类
  * 支持泛型、可扩展等功能
  * 
  * @param <T> 返回数据类型
@@ -27,15 +32,13 @@ public class Result<T> implements Serializable {
     // 扩展属性
     private String traceId;
     private Map<String, Object> extensions;
-    
-    // 私有构造函数，强制使用建造者模式
+
     private Result() {
         this.traceId = generateTraceId();
         this.timestamp = System.currentTimeMillis();
         this.extensions = new HashMap<>();
     }
-    
-    // Getters
+
     public Integer getStatus() { return status; }
     public String getCode() { return code; }
     public String getMessage() { return message; }
@@ -52,92 +55,60 @@ public class Result<T> implements Serializable {
     // 成功响应 - 无数据
     public static <T> Result<T> success() {
         return new Builder<T>()
-                .status(200)
-                .code("SUCCESS")
-                .message("操作成功")
+                .status(OK)
+                .code(SUCCESS)
+                .message("success")
                 .build();
     }
     
-    // 成功响应 - 带数据
+    // 成功响应
     public static <T> Result<T> success(T data) {
         return new Builder<T>()
-                .status(200)
-                .code("SUCCESS")
+                .status(OK)
+                .code(SUCCESS)
                 .message("操作成功")
                 .data(data)
                 .build();
     }
-    
-    // 成功响应 - 自定义消息
+
     public static <T> Result<T> success(String message, T data) {
         return new Builder<T>()
-                .status(200)
-                .code("SUCCESS")
+                .status(OK)
+                .code(SUCCESS)
                 .message(message)
                 .data(data)
                 .build();
     }
-    
-    // 错误响应 - 默认
-    public static <T> Result<T> error() {
+
+    public static <T> Result<T> success(String message, String code, T data) {
         return new Builder<T>()
-                .status(500)
-                .code("ERROR")
-                .message("操作失败")
-                .build();
-    }
-    
-    // 错误响应 - 自定义消息
-    public static <T> Result<T> error(String message) {
-        return new Builder<T>()
-                .status(500)
-                .code("ERROR")
+                .status(OK)
+                .code(code)
                 .message(message)
+                .data(data)
                 .build();
     }
-    
-    // 错误响应 - 自定义状态码和消息
-    public static <T> Result<T> error(Integer status, String code, String message) {
+
+
+    // 错误响应
+    public static <T> Result<T> error() {
+        return error(INTERNAL_SERVER_ERROR, ERROR, "error", null);
+    }
+
+    public static <T> Result<T> error(String message) {
+        return error(INTERNAL_SERVER_ERROR, ERROR, message, null);
+    }
+
+    public static <T> Result<T> error(String message, T data) {
+        return error(INTERNAL_SERVER_ERROR, ERROR, message, data);
+    }
+
+    public static <T> Result<T> error(Integer status, String code, String message, T data) {
         return new Builder<T>()
                 .status(status)
                 .code(code)
                 .message(message)
-                .build();
-    }
-    
-    // 验证错误
-    public static <T> Result<T> validationError(String message) {
-        return new Builder<T>()
-                .status(400)
-                .code("VALIDATION_ERROR")
-                .message(message)
-                .build();
-    }
-    
-    // 未授权
-    public static <T> Result<T> unauthorized(String message) {
-        return new Builder<T>()
-                .status(401)
-                .code("UNAUTHORIZED")
-                .message(message)
-                .build();
-    }
-    
-    // 禁止访问
-    public static <T> Result<T> forbidden(String message) {
-        return new Builder<T>()
-                .status(403)
-                .code("FORBIDDEN")
-                .message(message)
-                .build();
-    }
-    
-    // 资源未找到
-    public static <T> Result<T> notFound(String message) {
-        return new Builder<T>()
-                .status(404)
-                .code("NOT_FOUND")
-                .message(message)
+                .data(data)
                 .build();
     }
     
