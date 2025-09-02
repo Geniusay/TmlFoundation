@@ -1,0 +1,49 @@
+# 默认配置 - 链路追踪关闭
+tml:
+  web:
+    result:
+      trace-enabled: false
+      trace-id-strategy: UUID
+      timestamp-precision: SECONDS
+
+---
+# 测试配置1 - 开启链路追踪，UUID策略，毫秒精度
+spring:
+  config:
+    activate:
+      on-profile: test-trace-uuid
+      
+tml:
+  web:
+  result:
+    trace-enabled: true
+    trace-id-strategy: UUID
+    timestamp-precision: MILLISECONDS
+
+---
+# 测试配置2 - 开启链路追踪，雪花算法策略，纳秒精度
+spring:
+  config:
+    activate:
+      on-profile: test-trace-snowflake
+      
+tml:
+  web:
+  result:
+    trace-enabled: true
+    trace-id-strategy: SNOWFLAKE
+    timestamp-precision: NANOSECONDS
+
+---
+# 测试配置3 - 开启链路追踪，时间戳随机策略，秒精度
+spring:
+  config:
+    activate:
+      on-profile: test-trace-timestamp
+      
+tml:
+  web:
+  result:
+    trace-enabled: true
+    trace-id-strategy: TIMESTAMP_RANDOM
+    timestamp-precision: SECONDS
