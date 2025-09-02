@@ -1,9 +1,14 @@
-package io.github.timemachinelab.common.resp;
+package io.github.timemachinelab.common.resp.result;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.github.timemachinelab.util.time.TimeUtil;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static io.github.timemachinelab.common.constant.HttpCode.ERROR;
 import static io.github.timemachinelab.common.constant.HttpCode.SUCCESS;
@@ -30,12 +35,14 @@ public class Result<T> implements Serializable {
     private Long timestamp;     // 时间戳
     
     // 扩展属性
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String traceId;
+
     private Map<String, Object> extensions;
 
     private Result() {
         this.traceId = generateTraceId();
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = generateTimestamp();
         this.extensions = new HashMap<>();
     }
 
@@ -49,38 +56,46 @@ public class Result<T> implements Serializable {
     
     // 生成链路追踪ID
     private String generateTraceId() {
-        return UUID.randomUUID().toString().replace("-", "");
+        ResultConfig config = ResultConfigHolder.getConfig();
+        if (config == null || !config.isTraceEnabled()) {
+            return null;
+        }
+        
+        TraceIdGenerateStrategy strategy = config.getTraceIdStrategy();
+        switch (strategy) {
+            case SNOWFLAKE:
+                return String.valueOf(System.currentTimeMillis() << 12 | ThreadLocalRandom.current().nextInt(4096));
+            case TIMESTAMP_RANDOM:
+                return System.currentTimeMillis() + "_" + ThreadLocalRandom.current().nextInt(100000);
+            default:
+                return UUID.randomUUID().toString().replace("-", "");
+        }
+    }
+    
+    // 生成时间戳
+    private Long generateTimestamp() {
+        ResultConfig config = ResultConfigHolder.getConfig();
+        if (config == null) {
+            return TimeUtil.getCurrentTimestamp();
+        }
+        return TimeUtil.getCurrentTimestamp(config.getTimestampPrecision());
     }
     
     // 成功响应 - 无数据
     public static <T> Result<T> success() {
-        return new Builder<T>()
-                .status(OK)
-                .code(SUCCESS)
-                .message("success")
-                .build();
+        return success("success", SUCCESS, null);
     }
     
     // 成功响应
     public static <T> Result<T> success(T data) {
-        return new Builder<T>()
-                .status(OK)
-                .code(SUCCESS)
-                .message("操作成功")
-                .data(data)
-                .build();
+        return success(SUCCESS,"success", data);
     }
 
     public static <T> Result<T> success(String message, T data) {
-        return new Builder<T>()
-                .status(OK)
-                .code(SUCCESS)
-                .message(message)
-                .data(data)
-                .build();
+        return success(SUCCESS, message, data);
     }
 
-    public static <T> Result<T> success(String message, String code, T data) {
+    public static <T> Result<T> success(String code, String message, T data) {
         return new Builder<T>()
                 .status(OK)
                 .code(code)
@@ -99,8 +114,12 @@ public class Result<T> implements Serializable {
         return error(INTERNAL_SERVER_ERROR, ERROR, message, null);
     }
 
-    public static <T> Result<T> error(String message, T data) {
-        return error(INTERNAL_SERVER_ERROR, ERROR, message, data);
+    public static <T> Result<T> error(String code, String message) {
+        return error(INTERNAL_SERVER_ERROR, code, message, null);
+    }
+
+    public static <T> Result<T> error(String code, String message, T data) {
+        return error(INTERNAL_SERVER_ERROR, code, message, data);
     }
 
     public static <T> Result<T> error(Integer status, String code, String message, T data) {
