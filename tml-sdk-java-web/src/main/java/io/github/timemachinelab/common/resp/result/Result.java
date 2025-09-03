@@ -1,5 +1,6 @@
 package io.github.timemachinelab.common.resp.result;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.github.timemachinelab.util.time.TimeUtil;
@@ -38,6 +39,7 @@ public class Result<T> implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String traceId;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Map<String, Object> extensions;
 
     private Result() {
@@ -178,13 +180,16 @@ public class Result<T> implements Serializable {
             return result;
         }
     }
-    
+
+
     // 判断是否成功
+    @JsonIgnore
     public boolean isSuccess() {
         return this.status != null && this.status == 200;
     }
     
     // 判断是否失败
+    @JsonIgnore
     public boolean isError() {
         return !isSuccess();
     }
