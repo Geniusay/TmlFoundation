@@ -14,6 +14,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+import org.springframework.http.converter.StringHttpMessageConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 /**
  * 自动响应包装增强器
  * 在响应序列化前自动将返回值包装成Result对象
@@ -28,6 +32,7 @@ public class AutoRespAdvice implements ResponseBodyAdvice<Object> {
     /**
      * 判断是否需要处理响应体
      * 只处理标记了@AutoResp注解的Controller方法
+     * 优先使用JSON转换器，确保Result对象能正确序列化
      */
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -48,9 +53,12 @@ public class AutoRespAdvice implements ResponseBodyAdvice<Object> {
         return false;
     }
     
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    
     /**
      * 在响应体写入前进行处理
      * 将原始返回值包装成Result对象
+     * 特殊处理String类型以确保正确序列化
      */
     @Override
     public Object beforeBodyWrite(Object body, 
@@ -59,13 +67,27 @@ public class AutoRespAdvice implements ResponseBodyAdvice<Object> {
                                 Class<? extends HttpMessageConverter<?>> selectedConverterType, 
                                 ServerHttpRequest request,
                                 ServerHttpResponse response) {
-        
-        // 如果已经是Result类型，直接返回
+
         if (body instanceof Result) {
             return body;
         }
+
+        Result<?> result = Result.success(body);
         
-        // 包装成功结果
-        return Result.success(body);
+        // 如果是StringHttpMessageConverter，需要将Result序列化为JSON字符串
+        if (StringHttpMessageConverter.class.isAssignableFrom(selectedConverterType)) {
+            try {
+                response.getHeaders().set("Content-Type", "application/json;charset=UTF-8");
+                return objectMapper.writeValueAsString(result);
+            } catch (JsonProcessingException e) {
+                try {
+                    return objectMapper.writeValueAsString(Result.error("tml-foundation serialize error: " + e.getMessage()));
+                } catch (JsonProcessingException ex) {
+                    return "{\"code\":500,\"message\":\"tml-foundation serialize error!\",\"data\":null}";
+                }
+            }
+        }
+
+        return result;
     }
 }
