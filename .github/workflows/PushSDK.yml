@@ -1,20 +1,13 @@
 name: Maven Central Deploy (diagnostic)
 
 on:
-  release:
-    types: [published]     # 兼容 GitHub UI“Publish release”
-  push:
-    tags:
-      - '*'                # 推任意 tag 也触发
   workflow_dispatch:
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Java + OSSRH credentials + GPG
         uses: actions/setup-java@v4
@@ -22,44 +15,15 @@ jobs:
           distribution: temurin
           java-version: '11'
           server-id: ossrh
-          server-username: SERVER_USERNAME
-          server-password: SERVER_PASSWORD
+          server-username: SERVER_USERNAME      # 名字
+          server-password: SERVER_PASSWORD      # 名字
           gpg-private-key: ${{ secrets.GPG_SECRET }}
-          gpg-passphrase: GPG_PASSPHRASE
+          gpg-passphrase: GPG_PASSPHRASE        # 名字
 
-      - name: Show injected settings and POM ids
-        run: |
-          echo "==== ~/.m2/settings.xml (masked) ===="
-          sed 's/password>.*/password>****</' ~/.m2/settings.xml || true
-          echo
-          echo "==== Servers in settings.xml ===="
-          awk 'BEGIN{RS="</server>";FS="\n"} /<server>/{print $0"\n"}' ~/.m2/settings.xml | sed 's/password>.*/password>****</' || true
-          echo
-          echo "==== distributionManagement (all pom.xml) ===="
-          grep -R -nE "<distributionManagement>|<snapshotRepository>|<repository>|s01\.oss|oss\.sonatype" **/pom.xml || true
-          echo
-          echo "==== nexus-staging plugin config (if any) ===="
-          grep -R -nE "nexus-staging|nexusUrl|serverId" **/pom.xml || true
-          echo
-          echo "==== Effective project version ===="
-          mvn -q -DforceStdout help:evaluate -Dexpression=project.version || true
-
-      - name: Print target deploy URLs (from POM)
-        run: |
-          echo "Release repo URL:"
-          xmllint --xpath "string(//project/distributionManagement/repository/url)" **/pom.xml 2>/dev/null || true
-          echo
-          echo "Snapshot repo URL:"
-          xmllint --xpath "string(//project/distributionManagement/snapshotRepository/url)" **/pom.xml 2>/dev/null || true
-          echo
-
-      - name: Deploy (skip tests)
+      - name: Deploy SNAPSHOT (skip tests)
         env:
-          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}  # 值
+          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}  # 值
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
         run: |
-          # -DskipStaging=true: 若插件支持则在 SNAPSHOT 时跳过 staging；不支持时会被忽略
-          mvn -B -U -ntp -Dmaven.test.skip=true -DskipTests=true -DskipStaging=true \
-              -Dorg.slf4j.simpleLogger.log.org.apache.maven.wagon.providers.http.HttpClient=DEBUG \
-              deploy -e -X
+          mvn -B -U -ntp -Dmaven.test.skip=true -DskipTests=true -DskipStaging=true deploy
