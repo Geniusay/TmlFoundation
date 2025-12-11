@@ -1,57 +1,42 @@
-name: Maven Central Repo Deployment
+name: Maven Central Deploy (diagnostic)
 
 on:
-  release:
-    types: [released]
   workflow_dispatch:
 
 jobs:
-  publish-central:
+  publish:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Git Repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java + OSSRH credentials + GPG
+      - name: Java + Credentials
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '11'
-          # 必须与 POM 的 <distributionManagement> 中的 <id> 完全一致
           server-id: ossrh
-          # 这里填写“环境变量名”，不要写 ${{ secrets... }}
           server-username: SERVER_USERNAME
           server-password: SERVER_PASSWORD
-          # 导入 ASCII 装甲的私钥
           gpg-private-key: ${{ secrets.GPG_SECRET }}
-          # 这里填写“环境变量名”，env 中再提供对应值
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: Cache Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-${{ runner.os }}-
-
-      # 可选：调试用，确认 settings 已自动注入（不会泄露密码）
-      - name: Show injected settings (optional)
+      - name: Show injected settings and POM ids
         run: |
-          echo "==== ~/.m2/settings.xml ===="
+          echo "==== ~/.m2/settings.xml (masked) ===="
           sed 's/password>.*/password>****</' ~/.m2/settings.xml || true
           echo
-          echo "==== Check distributionManagement URLs ===="
-          grep -R -nE "distributionManagement|s01\.oss|oss\.sonatype" **/pom.xml || true
+          echo "==== distributionManagement (all pom.xml) ===="
+          grep -R -nE "<distributionManagement>|<snapshotRepository>|<repository>|oss\.sonatype|s01\.oss" **/pom.xml || true
           echo
-          echo "==== Project version ===="
+          echo "==== nexus-staging plugin config (if any) ===="
+          grep -R -nE "nexus-staging|nexusUrl|serverId" **/pom.xml || true
+          echo
+          echo "==== Version ===="
           mvn -q -DforceStdout help:evaluate -Dexpression=project.version || true
 
-      - name: Publish to Apache Maven Central (skip tests)
-        run: mvn -B -U -ntp -Dmaven.test.skip=true deploy
+      - name: Deploy SNAPSHOT (skip tests)
         env:
-          # 这里提供上面 with 中引用的环境变量的实际值
           SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
           SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
+        run: mvn -B -U -ntp -Dmaven.test.skip=true -DskipTests=true deploy -e -X
