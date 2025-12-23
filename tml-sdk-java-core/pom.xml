@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.timemachinelab</groupId>
         <artifactId>TmlFoundation</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>tml-sdk-java-core</artifactId>
