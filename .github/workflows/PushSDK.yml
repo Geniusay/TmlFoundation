@@ -1,29 +1,66 @@
-name: Maven Central Deploy (diagnostic)
+name: Release to Maven Central
 
 on:
   workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Set up Java + OSSRH credentials + GPG
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 11
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '11'
-          server-id: ossrh
-          server-username: SERVER_USERNAME      # 名字
-          server-password: SERVER_PASSWORD      # 名字
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
-          gpg-passphrase: GPG_PASSPHRASE        # 名字
+          cache: maven
 
-      - name: Deploy SNAPSHOT (skip tests)
+      - name: Import GPG private key
         env:
-          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}  # 值
-          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}  # 值
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          mvn -B -U -ntp -Dmaven.test.skip=true -DskipTests=true -DskipStaging=true deploy
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --list-secret-keys || true
+
+      - name: Create temporary Maven settings.xml
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'EOF'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>ossrh</id>
+                <username>${env.CENTRAL_USERNAME}</username>
+                <password>${env.CENTRAL_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Ensure release version
+        run: |
+          VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:3.5.0:exec)
+          echo "Project version: $VERSION"
+          if echo "$VERSION" | grep -qi SNAPSHOT; then
+            echo "ERROR: version is SNAPSHOT. Please set a non-SNAPSHOT version before releasing."
+            exit 1
+          fi
+
+      - name: Build, sign and deploy
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mvn -B -U -Dgpg.passphrase="$GPG_PASSPHRASE" clean deploy
