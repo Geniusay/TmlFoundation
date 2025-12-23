@@ -78,6 +78,47 @@ jobs:
           echo "Effective server IDs found in settings.xml:"
           awk -F'[<>]' '/<id>/{print "id=" $3}' ~/.m2/settings.xml || true
 
+      - - name: Check CENTRAL secrets length (no leak) and auth debug deploy
+      - env:
+      - CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+      - CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
+      - run: |
+      - set -e
+      - # 1) 检查 Secrets 长度（不泄露明文）
+      - USER_LEN=$(printf "%s" "$CENTRAL_USERNAME" | wc -c | tr -d ' ')
+      - TOKEN_LEN=$(printf "%s" "$CENTRAL_TOKEN" | wc -c | tr -d ' ')
+      - echo "USER_LEN=$USER_LEN"
+      - echo "TOKEN_LEN=$TOKEN_LEN"
+      - if [ "$USER_LEN" -eq 0 ] || [ "$TOKEN_LEN" -eq 0 ]; then
+      - echo "ERROR: CENTRAL_USERNAME or CENTRAL_TOKEN is empty. Fix Secrets before continuing."
+      - exit 1
+      - fi
+
+      - # 2) 用一个最小项目做一次 auth 检查（不影响你的主项目配置）
+      - mkdir -p /tmp/miniproj && cd /tmp/miniproj
+      - cat > pom.xml <<'XML'
+      - <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+      - <modelVersion>4.0.0</modelVersion>
+      - <groupId>io.github.timemachinelab</groupId>
+      - <artifactId>auth-check</artifactId>
+      - <version>0.0.1</version>
+      - <distributionManagement>
+      - <repository>
+      - <id>ossrh</id>
+      - <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      - </repository>
+      - <snapshotRepository>
+      - <id>ossrh</id>
+      - <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+      - </snapshotRepository>
+      - </distributionManagement>
+      - </project>
+      - XML
+
+      - # 3) 显式指定 settings，并开启 -X 抓取认证细节
+      - #    用 || true 避免 401 时整个 Job 直接失败，中断后续日志收集。
+      - mvn -X -B -U -s ~/.m2/settings.xml -DskipTests=true deploy || true
+
       # 确认版本不是 SNAPSHOT（发布前置检查）
       - name: Ensure release version (non-SNAPSHOT)
         run: |
