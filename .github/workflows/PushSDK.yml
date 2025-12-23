@@ -69,6 +69,16 @@ jobs:
             printf '</settings>\n'
           } > ~/.m2/settings.xml
 
+      - name: Probe Central auth with username guess
+        env:
+          U1: welsir                      # 如果你在 Profile 里找到了 Username，就改成那个
+          TOK: ${{ secrets.CENTRAL_TOKEN }}  # Publishing/Deployment Token 的明文
+        run: |
+          set -e
+          url=https://s01.oss.sonatype.org/service/local/staging/profiles
+          code=$(curl -s -o /dev/null -w "%{http_code}" -u "$U1:$TOK" "$url")
+          echo "probe($U1) => HTTP $code"
+
       - name: Diagnose Maven settings
         run: |
           echo "Show ~/.m2/settings.xml:"
