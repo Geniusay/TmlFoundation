@@ -70,6 +70,14 @@ jobs:
             printf '</settings>\n'
           } > ~/.m2/settings.xml
 
+
+      - name: Diagnose Maven settings
+        run: |
+          echo "Show ~/.m2/settings.xml:"
+          sed -n '1,200p' ~/.m2/settings.xml || true
+          echo "Effective server IDs found in settings.xml:"
+          awk -F'[<>]' '/<id>/{print "id=" $3}' ~/.m2/settings.xml || true
+
       # 确认版本不是 SNAPSHOT（发布前置检查）
       - name: Ensure release version (non-SNAPSHOT)
         run: |
