@@ -85,6 +85,7 @@ jobs:
           LAST_LINE=$(printf "%s" "$GPG_PRIVATE_KEY" | awk 'NF{line=$0} END{print line}')
           echo "$FIRST_LINE"; echo "..."; echo "$LAST_LINE"
 
+
       # 3) 写入 Maven settings.xml（避免 heredoc 的 YAML 坑）
       - name: Create temporary Maven settings.xml
         env:
