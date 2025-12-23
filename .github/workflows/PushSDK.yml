@@ -16,24 +16,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 11
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '11'
           cache: maven
 
-      # 1) 检查 Secrets 存在性（不打印敏感内容）
-      - name: Check secrets presence
+      # 可选：快速检查必需的 Secrets 是否存在（避免空跑）
+      - name: Check required secrets
         run: |
           [ -z "${{ secrets.GPG_PRIVATE_KEY }}" ] && echo "GPG_PRIVATE_KEY is EMPTY" && exit 1 || echo "GPG_PRIVATE_KEY is SET"
           [ -z "${{ secrets.CENTRAL_USERNAME }}" ] && echo "CENTRAL_USERNAME is EMPTY" && exit 1 || echo "CENTRAL_USERNAME is SET"
           [ -z "${{ secrets.CENTRAL_TOKEN }}" ] && echo "CENTRAL_TOKEN is EMPTY" && exit 1 || echo "CENTRAL_TOKEN is SET"
-          # 私钥无口令也可以；此处仅提示
+          # 无口令的私钥也可用；此处仅提示
           [ -z "${{ secrets.GPG_PASSPHRASE }}" ] && echo "GPG_PASSPHRASE is EMPTY (OK if your key has no passphrase)" || echo "GPG_PASSPHRASE is SET"
 
-      # 2) 导入 GPG 私钥并列出（支持原文或 base64 包裹）
-      - name: Import GPG private key and list
+      # 仅在 CI 导入私钥（你已把 private.asc 转成单行 base64 存在 GPG_PRIVATE_KEY）
+      - name: Import GPG private key (base64)
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
@@ -44,50 +44,15 @@ jobs:
           printf "allow-loopback-pinentry\n" >> ~/.gnupg/gpg-agent.conf
           gpgconf --kill gpg-agent || true
 
-          KEY_RAW_FILE="$RUNNER_TEMP/private_raw.asc"
-          printf "%s" "$GPG_PRIVATE_KEY" > "$KEY_RAW_FILE"
+          echo "$GPG_PRIVATE_KEY" > "$RUNNER_TEMP/priv.b64"
+          base64 -d "$RUNNER_TEMP/priv.b64" > "$RUNNER_TEMP/private.asc"
 
-          echo "== Try A: import raw file =="
-          set +e
-          gpg --batch --import "$KEY_RAW_FILE" 2> "$RUNNER_TEMP/import_err_raw.log"
-          RC_RAW=$?
-          set -e
-          if [ $RC_RAW -ne 0 ]; then
-            echo "Import raw failed with code $RC_RAW"
-            echo "--- stderr ---"; cat "$RUNNER_TEMP/import_err_raw.log" || true; echo "--------------"
-          fi
+          gpg --batch --import "$RUNNER_TEMP/private.asc"
+          echo "== Secret keys in keyring =="
+          gpg --batch --list-secret-keys --keyid-format LONG || true
 
-          if ! gpg --batch --list-secret-keys --keyid-format LONG | grep -q '^sec'; then
-            echo "== Try B: import base64-decoded =="
-            KEY_B64_FILE="$RUNNER_TEMP/private_b64_decoded.asc"
-            set +e
-            base64 -d "$KEY_RAW_FILE" > "$KEY_B64_FILE" 2> /dev/null
-            RC_B64=$?
-            set -e
-            if [ $RC_B64 -eq 0 ] && [ -s "$KEY_B64_FILE" ]; then
-              set +e
-              gpg --batch --import "$KEY_B64_FILE" 2> "$RUNNER_TEMP/import_err_b64.log"
-              RC_IMP_B64=$?
-              set -e
-              if [ $RC_IMP_B64 -ne 0 ]; then
-                echo "Import base64-decoded failed with code $RC_IMP_B64"
-                echo "--- stderr ---"; cat "$RUNNER_TEMP/import_err_b64.log" || true; echo "--------------"
-              fi
-            else
-              echo "Base64 decode not applicable or produced empty content."
-            fi
-          fi
-
-          echo "== GPG version =="; gpg --version
-          echo "== Secret keys in keyring =="; gpg --batch --list-secret-keys --keyid-format LONG || true
-          echo "== First/Last non-empty lines of provided secret =="
-          FIRST_LINE=$(printf "%s" "$GPG_PRIVATE_KEY" | awk 'NF{print; exit}')
-          LAST_LINE=$(printf "%s" "$GPG_PRIVATE_KEY" | awk 'NF{line=$0} END{print line}')
-          echo "$FIRST_LINE"; echo "..."; echo "$LAST_LINE"
-
-
-      # 3) 写入 Maven settings.xml（避免 heredoc 的 YAML 坑）
-      - name: Create temporary Maven settings.xml
+      # 仅在 CI 生成 settings.xml（开发者本地无需配置）
+      - name: Create temporary Maven settings.xml (CI-only)
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
@@ -104,33 +69,28 @@ jobs:
             printf '  </servers>\n'
             printf '</settings>\n'
           } > ~/.m2/settings.xml
-          echo "== Generated ~/.m2/settings.xml =="
-          sed -n '1,120p' ~/.m2/settings.xml
 
-      # 4) 确认发布版本不是 SNAPSHOT
-      - name: Ensure release version
+      # 确认版本不是 SNAPSHOT（发布前置检查）
+      - name: Ensure release version (non-SNAPSHOT)
         run: |
           VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:3.5.0:exec)
           echo "Project version: $VERSION"
           if echo "$VERSION" | grep -qi SNAPSHOT; then
-            echo "ERROR: version is SNAPSHOT. Please set a non-SNAPSHOT version before releasing."
-            exit 1
-          fi
+            echo "ERROR: version is SNAPSHOT. Please set a release version."; exit 1; fi
 
-      # 5) 先 verify（详细日志），显式指定 keyname，便于定位问题
-      - name: Verify with detailed logs (GPG)
+      # 先 verify，便于排错；显式指定 KEYID（替换为你的 KEYID）
+      - name: Verify with signing (detailed logs)
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          KEY_ID=$(gpg --batch --list-secret-keys --keyid-format LONG | awk '/^sec/{print $2}' | cut -d'/' -f2 | head -n1)
-          echo "Detected KEY_ID=$KEY_ID"
-          if [ -z "$KEY_ID" ]; then echo "No secret key detected, abort."; exit 1; fi
+          KEY_ID="6BFD927CC2352BD5"  # TODO: 替换为你的长 KEYID（保持一致）
+          echo "Using KEY_ID=$KEY_ID"
           mvn -e -X -Dgpg.passphrase="$GPG_PASSPHRASE" -Dgpg.keyname="$KEY_ID" -DskipTests=true clean verify
 
-      # 6) 签名并发布到 Central
+      # 签名并发布到 OSSRH（Maven Central）
       - name: Build, sign and deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          KEY_ID=$(gpg --batch --list-secret-keys --keyid-format LONG | awk '/^sec/{print $2}' | cut -d'/' -f2 | head -n1)
+          KEY_ID="6BFD927CC2352BD5"  # TODO: 同上
           mvn -B -U -Dgpg.passphrase="$GPG_PASSPHRASE" -Dgpg.keyname="$KEY_ID" clean deploy
