@@ -53,15 +53,25 @@ jobs:
 
       - name: Configure GPG Key
         run: |
+          # 确保目录存在
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
+          
+          # 写入配置
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          
+          # 重载 Agent
           gpg-connect-agent reloadagent /bye
+          
+          # 导入私钥
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          
+          # 验证并预热（非必须，但可以提前暴露问题）
           echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --always-trust --yes --passphrase-fd 0 --pinentry-mode loopback -s -o /dev/null
 
       - name: Deploy to Central Portal
         run: |
+          # 强制设置 GPG 终端环境
           export GPG_TTY=$(tty)
           mvn -X -B -U \
             -DskipTests=true \
