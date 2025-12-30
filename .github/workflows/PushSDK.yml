@@ -53,6 +53,8 @@ jobs:
 
       - name: Configure GPG Key
         run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           gpg-connect-agent reloadagent /bye
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
