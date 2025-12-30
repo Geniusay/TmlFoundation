@@ -66,6 +66,7 @@ jobs:
         run: |
           mvn -X -B -U \
             -DskipTests=true \
+            -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
             clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
