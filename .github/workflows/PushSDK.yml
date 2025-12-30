@@ -64,9 +64,11 @@ jobs:
 
       - name: Deploy to Central Portal
         run: |
+          export GPG_TTY=$(tty)
           mvn -X -B -U \
             -DskipTests=true \
             -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
+            -Dgpg.pinentry-mode=loopback \
             clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
