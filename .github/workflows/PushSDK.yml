@@ -51,25 +51,24 @@ jobs:
           OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_TOKEN_USERNAME }}
           OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
 
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
       - name: Show Java and Maven versions
         run: |
           java -version
           mvn -v
 
-      - name: Probe s01 with token (no secrets printed)
-        run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" -u "${OSSRH_TOKEN_USERNAME}:${OSSRH_TOKEN_PASSWORD}" "https://s01.oss.sonatype.org/service/local/status")
-          echo "status_code=$code"
-        env:
-          OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_TOKEN_USERNAME }}
-          OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
-
-      - name: Deploy (skip tests and gpg signing for now)
+      - name: Deploy to Central Portal
         run: |
           mvn -X -B -U \
             -DskipTests=true \
-            -Dgpg.skip=true \
             clean deploy
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       # 如果你的 POM 未配置 distributionManagement，或想强制直传，可用下面这个步骤替代上面的 Deploy：
       # - name: Deploy via altDeploymentRepository
