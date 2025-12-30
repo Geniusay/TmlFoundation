@@ -178,6 +178,8 @@
                 </executions>
             </plugin>
 
+            <!-- central-publishing-maven-plugin 暂时移除，使用 maven-deploy-plugin 直传 -->
+            <!--
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -189,27 +191,13 @@
                     <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
+            -->
 
-            <!-- maven-deploy-plugin 按“PUT 上传”即可，端点在 distributionManagement 中已切换 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.2</version>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
+                <!-- 恢复默认配置 -->
             </plugin>
         </plugins>
     </build>
