@@ -59,8 +59,14 @@ jobs:
             exit 1
           fi
 
-      - name: Build, sign and deploy
+      - name: Deploy to Central Portal
+        run: |
+          # 强制设置 GPG 终端环境
+          export GPG_TTY=$(tty)
+          mvn -X -B -U \
+            -DskipTests=true \
+            -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
+            -Dgpg.pinentry-mode=loopback \
+            clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          mvn -B -U -Dgpg.passphrase="$GPG_PASSPHRASE" clean deploy
