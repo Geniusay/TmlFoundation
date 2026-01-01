@@ -67,6 +67,8 @@ jobs:
             -DskipTests=true \
             -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
             -Dgpg.pinentry-mode=loopback \
+            -Dcentral.token.username=${{ secrets.OSSRH_TOKEN_USERNAME }} \
+            -Dcentral.token.password=${{ secrets.OSSRH_TOKEN_PASSWORD }} \
             clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
