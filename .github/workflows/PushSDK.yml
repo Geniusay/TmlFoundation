@@ -47,6 +47,10 @@ jobs:
             </servers>
           </settings>
           EOF
+          
+          # DEBUG: 检查 settings.xml 内容（替换密码以防泄露）
+          echo "Generated settings.xml content (sanitized):"
+          sed 's/<password>.*<\/password>/<password>***<\/password>/' ~/.m2/settings.xml
         env:
           OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_TOKEN_USERNAME }}
           OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
