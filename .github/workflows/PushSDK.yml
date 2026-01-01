@@ -67,8 +67,9 @@ jobs:
             -DskipTests=true \
             -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
             -Dgpg.pinentry-mode=loopback \
-            -Dcentral.token.username=${{ secrets.OSSRH_TOKEN_USERNAME }} \
-            -Dcentral.token.password=${{ secrets.OSSRH_TOKEN_PASSWORD }} \
+            -DaltDeploymentRepository="ossrh::default::https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/" \
             clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_TOKEN_USERNAME }}
+          OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
