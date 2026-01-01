@@ -21,7 +21,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <boot.version>2.3.9.RELEASE</boot.version>
-        <skipTests>true</skipTests>
     </properties>
 
     <parent>
@@ -45,29 +44,38 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!--springBoot-test-->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
                 <version>${boot.version}</version>
             </dependency>
+            <!-- JUnit 5 -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>5.9.2</version>
                 <scope>test</scope>
             </dependency>
+            
+            <!-- Mockito -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>3.6.28</version>
                 <scope>test</scope>
             </dependency>
+            
+            <!-- Mockito JUnit Jupiter -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
                 <version>3.6.28</version>
                 <scope>test</scope>
             </dependency>
+            
+            <!-- AssertJ -->
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
@@ -78,21 +86,30 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <!--        TEST         -->
+        <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Mockito JUnit Jupiter -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- AssertJ -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -100,7 +117,9 @@
         </dependency>
     </dependencies>
 
-    <url>https://github.com/Time-Machine-Lab/TmlFoundation.git</url>
+    <url>
+        https://github.com/Time-Machine-Lab/TmlFoundation.git
+    </url>
 
     <licenses>
         <license>
@@ -111,15 +130,12 @@
         </license>
     </licenses>
 
-    <!-- 切换到“OSSRH Staging API 兼容服务”的发布端点 -->
     <distributionManagement>
         <repository>
             <id>ossrh</id>
-            <name>OSSRH Staging API (Central)</name>
-            <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
+            <name>Nexus Release Repository</name>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-        <!-- 如需快照，也可在 settings.xml 单独配 snapshotRepositoryUrl:
-             https://central.sonatype.com/repository/maven-snapshots/ -->
     </distributionManagement>
 
     <build>
@@ -168,37 +184,31 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
-                        <configuration>
-                            <!-- 防止在 CI 环境出现 GPG 弹窗错误 -->
-                            <gpgArguments>
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- central-publishing-maven-plugin 暂时移除，使用 maven-deploy-plugin 直传 -->
-            <!--
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.7.0</version>
+                <version>0.6.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>ossrh</publishingServerId>
                     <tokenAuth>true</tokenAuth>
                     <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
                 </configuration>
             </plugin>
-            -->
 
+            <!-- maven-deploy-plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.2</version>
-                <!-- 恢复默认配置 -->
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -211,7 +221,7 @@
     </scm>
 
     <profiles>
-        <!-- Deployment profile（保持不变） -->
+        <!-- Deployment profile (required so these plugins are only used when deploying) -->
         <!-- 下面这个标签里的不能改 -->
         <profile>
             <id>deploy</id>
