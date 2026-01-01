@@ -52,7 +52,7 @@ class ResultTest {
         Result<Void> emptyResult = Result.success();
         assertTrue(emptyResult.isSuccess());
         assertNull(emptyResult.getData());
-        assertEquals("success", emptyResult.getMessage());
+        assertEquals("tml.success", emptyResult.getMessage());
         
         // 带数据成功响应
         Result<String> dataResult = Result.success("hello");
@@ -74,7 +74,7 @@ class ResultTest {
         System.out.println(errorResult);
         assertTrue(errorResult.isError());
         assertFalse(errorResult.isSuccess());
-        assertEquals("error", errorResult.getMessage());
+        assertEquals("tml.error", errorResult.getMessage());
         
         // 自定义消息错误响应
         Result<Void> customErrorResult = Result.error("操作失败");

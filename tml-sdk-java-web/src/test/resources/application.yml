@@ -15,10 +15,10 @@ spring:
       
 tml:
   web:
-  result:
-    trace-enabled: true
-    trace-id-strategy: UUID
-    timestamp-precision: MILLISECONDS
+    result:
+      trace-enabled: true
+      trace-id-strategy: UUID
+      timestamp-precision: MILLISECONDS
 
 ---
 # 测试配置2 - 开启链路追踪，雪花算法策略，纳秒精度
@@ -29,10 +29,10 @@ spring:
       
 tml:
   web:
-  result:
-    trace-enabled: true
-    trace-id-strategy: SNOWFLAKE
-    timestamp-precision: NANOSECONDS
+    result:
+      trace-enabled: true
+      trace-id-strategy: SNOWFLAKE
+      timestamp-precision: NANOSECONDS
 
 ---
 # 测试配置3 - 开启链路追踪，时间戳随机策略，秒精度
@@ -43,7 +43,7 @@ spring:
       
 tml:
   web:
-  result:
-    trace-enabled: true
-    trace-id-strategy: TIMESTAMP_RANDOM
-    timestamp-precision: SECONDS
+    result:
+      trace-enabled: true
+      trace-id-strategy: TIMESTAMP_RANDOM
+      timestamp-precision: SECONDS
