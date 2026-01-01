@@ -34,15 +34,16 @@ jobs:
       - name: Prepare Maven settings.xml with OSSRH token
         run: |
           mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << 'EOF'
+          # 使用双引号 EOF 确保变量被 shell 展开
+          cat > ~/.m2/settings.xml << EOF
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
             <servers>
               <server>
                 <id>ossrh</id>
-                <username>${env.OSSRH_TOKEN_USERNAME}</username>
-                <password>${env.OSSRH_TOKEN_PASSWORD}</password>
+                <username>${OSSRH_TOKEN_USERNAME}</username>
+                <password>${OSSRH_TOKEN_PASSWORD}</password>
               </server>
             </servers>
           </settings>
