@@ -188,24 +188,24 @@
                 </executions>
             </plugin>
 
-            <!-- central-publishing-maven-plugin 彻底放弃，改用 maven-deploy-plugin -->
-            <!--
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <version>0.9.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <publishingServerId>central</publishingServerId>
+                    <publishingServerId>ossrh</publishingServerId>
                     <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
-            -->
-
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>
