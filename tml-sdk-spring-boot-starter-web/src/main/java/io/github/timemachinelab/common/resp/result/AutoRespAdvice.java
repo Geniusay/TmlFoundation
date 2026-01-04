@@ -14,9 +14,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-import org.springframework.http.converter.StringHttpMessageConverter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.converter.StringHttpMessageConverter;
 
 /**
  * 自动响应包装增强器
@@ -53,7 +53,11 @@ public class AutoRespAdvice implements ResponseBodyAdvice<Object> {
         return false;
     }
     
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public AutoRespAdvice(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
     
     /**
      * 在响应体写入前进行处理

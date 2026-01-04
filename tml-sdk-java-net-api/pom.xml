@@ -9,19 +9,12 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>tml-sdk-java-core</artifactId>
-    <name>tml-sdk-java-core</name>
-    <description>TmlFoundation Core SDK</description>
-    <url>https://github.com/Time-Machine-Lab/TmlFoundation</url>
+    <artifactId>tml-sdk-java-net-api</artifactId>
 
     <properties>
-        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-
-    <dependencies>
-
-    </dependencies>
 
 </project>

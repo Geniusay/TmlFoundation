@@ -2,7 +2,6 @@ package io.github.timemachinelab.common.resp.result;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import io.github.timemachinelab.util.time.TimeUtil;
 
 import java.io.Serializable;
@@ -16,26 +15,16 @@ import static io.github.timemachinelab.common.constant.HttpCode.SUCCESS;
 import static io.github.timemachinelab.common.constant.HttpStatus.INTERNAL_SERVER_ERROR;
 import static io.github.timemachinelab.common.constant.HttpStatus.OK;
 
-/**
- * HTTP响应结果类
- * 支持泛型、可扩展等功能
- * 
- * @param <T> 返回数据类型
- * @author TimeMachineLab
- * @version 1.0.0
- */
 public class Result<T> implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
-    // 核心属性
-    private Integer status;     // HTTP状态码
-    private String code;        // 业务返回码
-    private String message;     // 返回消息
-    private T data;             // 返回数据
-    private Long timestamp;     // 时间戳
-    
-    // 扩展属性
+
+    private Integer status;
+    private String code;
+    private String message;
+    private T data;
+    private Long timestamp;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String traceId;
 
@@ -48,21 +37,40 @@ public class Result<T> implements Serializable {
         this.extensions = new HashMap<>();
     }
 
-    public Integer getStatus() { return status; }
-    public String getCode() { return code; }
-    public String getMessage() { return message; }
-    public T getData() { return data; }
-    public Long getTimestamp() { return timestamp; }
-    public String getTraceId() { return traceId; }
-    public Map<String, Object> getExtensions() { return extensions; }
-    
-    // 生成链路追踪ID
+    public Integer getStatus() {
+        return status;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public Map<String, Object> getExtensions() {
+        return extensions;
+    }
+
     private String generateTraceId() {
         ResultConfig config = ResultConfigHolder.getConfig();
         if (config == null || !config.isTraceEnabled()) {
             return null;
         }
-        
+
         TraceIdGenerateStrategy strategy = config.getTraceIdStrategy();
         switch (strategy) {
             case SNOWFLAKE:
@@ -73,8 +81,7 @@ public class Result<T> implements Serializable {
                 return UUID.randomUUID().toString().replace("-", "");
         }
     }
-    
-    // 生成时间戳
+
     private Long generateTimestamp() {
         ResultConfig config = ResultConfigHolder.getConfig();
         if (config == null) {
@@ -82,15 +89,13 @@ public class Result<T> implements Serializable {
         }
         return TimeUtil.getCurrentTimestamp(config.getTimestampPrecision());
     }
-    
-    // 成功响应 - 无数据
+
     public static <T> Result<T> success() {
         return success("success", SUCCESS, null);
     }
-    
-    // 成功响应
+
     public static <T> Result<T> success(T data) {
-        return success(SUCCESS,"success", data);
+        return success(SUCCESS, "success", data);
     }
 
     public static <T> Result<T> success(String message, T data) {
@@ -106,8 +111,6 @@ public class Result<T> implements Serializable {
                 .build();
     }
 
-
-    // 错误响应
     public static <T> Result<T> error() {
         return error(INTERNAL_SERVER_ERROR, ERROR, "error", null);
     }
@@ -132,80 +135,74 @@ public class Result<T> implements Serializable {
                 .data(data)
                 .build();
     }
-    
-    // 建造者模式
+
     public static class Builder<T> {
         private final Result<T> result;
-        
+
         public Builder() {
             this.result = new Result<>();
         }
-        
+
         public Builder<T> status(Integer status) {
             result.status = status;
             return this;
         }
-        
+
         public Builder<T> code(String code) {
             result.code = code;
             return this;
         }
-        
+
         public Builder<T> message(String message) {
             result.message = message;
             return this;
         }
-        
+
         public Builder<T> data(T data) {
             result.data = data;
             return this;
         }
-        
+
         public Builder<T> traceId(String traceId) {
             result.traceId = traceId;
             return this;
         }
-        
+
         public Builder<T> extension(String key, Object value) {
             result.extensions.put(key, value);
             return this;
         }
-        
+
         public Builder<T> extensions(Map<String, Object> extensions) {
             result.extensions.putAll(extensions);
             return this;
         }
-        
+
         public Result<T> build() {
             return result;
         }
     }
 
-
-    // 判断是否成功
     @JsonIgnore
     public boolean isSuccess() {
         return this.status != null && this.status == 200;
     }
-    
-    // 判断是否失败
+
     @JsonIgnore
     public boolean isError() {
         return !isSuccess();
     }
-    
-    // 链式调用 - 添加扩展属性
+
     public Result<T> addExtension(String key, Object value) {
         this.extensions.put(key, value);
         return this;
     }
-    
-    // 链式调用 - 设置链路追踪ID
+
     public Result<T> withTraceId(String traceId) {
         this.traceId = traceId;
         return this;
     }
-    
+
     @Override
     public String toString() {
         return String.format("Result{status=%d, code='%s', message='%s', data=%s, traceId='%s', timestamp=%d}",

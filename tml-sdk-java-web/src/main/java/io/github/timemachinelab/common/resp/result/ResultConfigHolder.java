@@ -1,31 +1,22 @@
 package io.github.timemachinelab.common.resp.result;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
-import javax.annotation.PostConstruct;
+public final class ResultConfigHolder {
 
-/**
- * Result配置持有者
- * 用于在静态上下文中访问ResultConfig
- * 
- * @author TimeMachineLab
- * @version 1.0.0
- */
-@Component
-public class ResultConfigHolder {
-    
-    @Autowired
-    private ResultConfig resultConfig;
-    
-    private static ResultConfig staticConfig;
-    
-    @PostConstruct
-    public void init() {
-        staticConfig = this.resultConfig;
+    private static final AtomicReference<ResultConfig> CONFIG = new AtomicReference<>(new ResultConfig());
+
+    private ResultConfigHolder() {
     }
-    
+
     public static ResultConfig getConfig() {
-        return staticConfig;
+        return CONFIG.get();
+    }
+
+    public static void setConfig(ResultConfig config) {
+        if (Objects.nonNull(config)) {
+            CONFIG.set(config);
+        }
     }
 }
