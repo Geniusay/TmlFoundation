@@ -50,6 +50,12 @@ jobs:
           </settings>
           EOF
 
+          # DEBUG: 检查 settings.xml 内容（替换密码以防泄露）
+          echo "Generated settings.xml content (sanitized):"
+          sed 's/<password>.*<\/password>/<password>***<\/password>/' ~/.m2/settings.xml
+          # 额外检查 username 是否也被正确替换了（只显示前几位）
+          grep "<username>" ~/.m2/settings.xml | sed 's/<username>\(.\{3\}\).*<\/username>/<username>\1***<\/username>/'
+
       - name: Ensure release version
         run: |
           VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:3.5.0:exec)
