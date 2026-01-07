@@ -56,6 +56,11 @@ jobs:
           # 额外检查 username 是否也被正确替换了（只显示前几位）
           grep "<username>" ~/.m2/settings.xml | sed 's/<username>\(.\{3\}\).*<\/username>/<username>\1***<\/username>/'
 
+      - name: Install BOM locally
+        run: |
+          echo "Installing BOM to local repository to resolve dependencyManagement import..."
+          mvn install -N -f tml-sdk-java-bom/pom.xml
+
       - name: Ensure release version
         run: |
           echo "Debug: Fetching project version..."

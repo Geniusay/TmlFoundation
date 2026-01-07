@@ -5,11 +5,13 @@
   <parent>
     <groupId>io.github.timemachinelab</groupId>
     <artifactId>TmlFoundation</artifactId>
-    <version>1.1.0-alpha.1</version>
+    <version>1.1.0-alpha.2</version>
   </parent>
   <groupId>io.github.timemachinelab</groupId>
   <artifactId>tml-sdk-java-cache-api</artifactId>
-  <version>1.1.0-alpha.1</version>
+  <version>1.1.0-alpha.2</version>
+  <name>tml-sdk-java-cache-api</name>
+  <description>TML SDK Java Cache API</description>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>

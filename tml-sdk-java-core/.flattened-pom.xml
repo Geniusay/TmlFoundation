@@ -5,11 +5,11 @@
   <parent>
     <groupId>io.github.timemachinelab</groupId>
     <artifactId>TmlFoundation</artifactId>
-    <version>1.1.0-alpha.1</version>
+    <version>1.1.0-alpha.2</version>
   </parent>
   <groupId>io.github.timemachinelab</groupId>
   <artifactId>tml-sdk-java-core</artifactId>
-  <version>1.1.0-alpha.1</version>
+  <version>1.1.0-alpha.2</version>
   <name>tml-sdk-java-core</name>
   <description>TmlFoundation Core SDK</description>
   <url>https://github.com/Time-Machine-Lab/TmlFoundation</url>
