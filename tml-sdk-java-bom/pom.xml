@@ -32,12 +32,6 @@
         </developer>
     </developers>
 
-    <scm>
-        <tag>master</tag>
-        <url>https://github.com/Time-Machine-Lab/TmlFoundation</url>
-        <connection>scm:git:https://github.com/Time-Machine-Lab/TmlFoundation.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/Time-Machine-Lab/TmlFoundation.git</developerConnection>
-    </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -138,4 +132,29 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Deployment profile (required so these plugins are only used when deploying) -->
+        <!-- 下面这个标签里的不能改 -->
+        <profile>
+            <id>deploy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <!-- GPG plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
