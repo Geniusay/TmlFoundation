@@ -28,26 +28,66 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <spring-boot.version>2.3.9.RELEASE</spring-boot.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <!-- 
-                在根 POM 中直接 import 自己模块的 BOM 会导致解析错误，
-                因为在构建初期该 BOM 尚未发布到仓库。
-                通常的做法是在子模块中 import BOM，或者在这里手动列出所有版本管理，
-                或者使用 flatten-maven-plugin 来处理版本变量。
-                这里先注释掉这个自引用的 import。
+                由于无法在根 POM 中 import 自己模块的 BOM（循环依赖问题），
+                这里将 BOM 中的内容复制一份到这里进行统一管理。
+                这样子模块在继承根 POM 后，就可以直接引用这些依赖而无需指定版本。
             -->
-            <!--
             <dependency>
                 <groupId>io.github.timemachinelab</groupId>
-                <artifactId>tml-sdk-java-bom</artifactId>
+                <artifactId>tml-sdk-java-core</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.timemachinelab</groupId>
+                <artifactId>tml-sdk-java-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.timemachinelab</groupId>
+                <artifactId>tml-sdk-spring-boot-autoconfigure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.timemachinelab</groupId>
+                <artifactId>tml-sdk-spring-boot-starter-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.timemachinelab</groupId>
+                <artifactId>tml-sdk-java-fucking-bug</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.timemachinelab</groupId>
+                <artifactId>tml-sdk-java-cache-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.timemachinelab</groupId>
+                <artifactId>tml-sdk-java-net-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- 第三方依赖 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            -->
         </dependencies>
     </dependencyManagement>
 
