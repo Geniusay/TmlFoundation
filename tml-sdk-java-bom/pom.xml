@@ -3,10 +3,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.timemachinelab</groupId>
+    <parent>
+        <groupId>io.github.timemachinelab</groupId>
+        <artifactId>TmlFoundation</artifactId>
+        <version>1.1.0-alpha.1</version>
+    </parent>
     <artifactId>tml-sdk-java-bom</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0-alpha.1</version>
+    <name>tml-sdk-java-bom</name>
+    <description>TmlFoundation BOM</description>
+    <url>https://github.com/Time-Machine-Lab/TmlFoundation</url>
 
     <properties>
         <spring-boot.version>2.3.9.RELEASE</spring-boot.version>
