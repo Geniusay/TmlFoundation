@@ -32,6 +32,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- 
+                在根 POM 中直接 import 自己模块的 BOM 会导致解析错误，
+                因为在构建初期该 BOM 尚未发布到仓库。
+                通常的做法是在子模块中 import BOM，或者在这里手动列出所有版本管理，
+                或者使用 flatten-maven-plugin 来处理版本变量。
+                这里先注释掉这个自引用的 import。
+            -->
+            <!--
             <dependency>
                 <groupId>io.github.timemachinelab</groupId>
                 <artifactId>tml-sdk-java-bom</artifactId>
@@ -39,6 +47,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            -->
         </dependencies>
     </dependencyManagement>
 

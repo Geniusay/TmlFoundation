@@ -60,9 +60,10 @@ jobs:
         run: |
           echo "Debug: Fetching project version..."
           # 尝试获取版本号，将结果保存到文件以便调试
-          if ! mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate -Dexpression=project.version -q -DforceStdout -N > version.txt; then
+          # 注意：在 Linux Shell 中需要对参数值使用引号
+          if ! mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate "-Dexpression=project.version" -q -DforceStdout -N > version.txt; then
             echo "Error: Failed to get version from Maven. Re-running with debug output:"
-            mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate -Dexpression=project.version -DforceStdout -N
+            mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate "-Dexpression=project.version" -DforceStdout -N
             exit 1
           fi
 
