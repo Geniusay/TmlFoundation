@@ -139,6 +139,7 @@
                 <configuration>
                     <publishingServerId>ossrh</publishingServerId>
                     <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
                     <excludeArtifacts>
                         <excludeArtifact>io.github.timemachinelab:TmlFoundation</excludeArtifact>
                     </excludeArtifacts>

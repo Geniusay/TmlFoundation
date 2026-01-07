@@ -10,7 +10,12 @@
     <name>tml-sdk-java-bom</name>
     <description>TmlFoundation BOM</description>
     <url>https://github.com/Time-Machine-Lab/TmlFoundation</url>
-
+    <scm>
+        <tag>master</tag>
+        <url>https://github.com/Time-Machine-Lab/TmlFoundation</url>
+        <connection>scm:git:https://github.com/Time-Machine-Lab/TmlFoundation.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/Time-Machine-Lab/TmlFoundation.git</developerConnection>
+    </scm>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -127,6 +132,7 @@
                 <configuration>
                     <publishingServerId>ossrh</publishingServerId>
                     <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
                 </configuration>
             </plugin>
         </plugins>
