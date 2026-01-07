@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>tml-sdk-java-net-api</artifactId>
+    <name>tml-sdk-java-net-api</name>
+    <description>TML SDK Java Net API</description>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

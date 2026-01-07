@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>tml-sdk-spring-boot-autoconfigure</artifactId>
+    <name>tml-sdk-spring-boot-autoconfigure</name>
+    <description>TML SDK Spring Boot Autoconfigure</description>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

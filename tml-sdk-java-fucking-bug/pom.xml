@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>tml-sdk-java-fucking-bug</artifactId>
+    <name>tml-sdk-java-fucking-bug</name>
+    <description>TML SDK Java Fucking Bug</description>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
