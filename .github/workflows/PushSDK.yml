@@ -58,8 +58,25 @@ jobs:
 
       - name: Ensure release version
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -N)
-          echo "Project version: $VERSION"
+          echo "Debug: Fetching project version..."
+          # 尝试获取版本号，将结果保存到文件以便调试
+          if ! mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate -Dexpression=project.version -q -DforceStdout -N > version.txt; then
+            echo "Error: Failed to get version from Maven. Re-running with debug output:"
+            mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate -Dexpression=project.version -DforceStdout -N
+            exit 1
+          fi
+
+          VERSION=$(cat version.txt)
+          echo "Debug: Detected version: '$VERSION'"
+          
+          # 去除可能的空白字符
+          VERSION=$(echo "$VERSION" | xargs)
+          
+          if [ -z "$VERSION" ]; then
+            echo "Error: Version result is empty."
+            exit 1
+          fi
+
           if echo "$VERSION" | grep -qi SNAPSHOT; then
             echo "ERROR: version is SNAPSHOT. Please set a non-SNAPSHOT version before releasing."
             exit 1
