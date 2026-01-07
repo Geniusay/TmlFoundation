@@ -58,7 +58,7 @@ jobs:
 
       - name: Ensure release version
         run: |
-          VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:3.5.0:exec)
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -N)
           echo "Project version: $VERSION"
           if echo "$VERSION" | grep -qi SNAPSHOT; then
             echo "ERROR: version is SNAPSHOT. Please set a non-SNAPSHOT version before releasing."
