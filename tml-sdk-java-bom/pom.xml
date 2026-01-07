@@ -32,7 +32,6 @@
         </developer>
     </developers>
 
-
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

@@ -56,19 +56,14 @@ jobs:
           # 额外检查 username 是否也被正确替换了（只显示前几位）
           grep "<username>" ~/.m2/settings.xml | sed 's/<username>\(.\{3\}\).*<\/username>/<username>\1***<\/username>/'
 
-      - name: Install BOM locally
-        run: |
-          echo "Installing BOM to local repository to resolve dependencyManagement import..."
-          mvn install -N -f tml-sdk-java-bom/pom.xml
-
       - name: Ensure release version
         run: |
           echo "Debug: Fetching project version..."
           # 尝试获取版本号，将结果保存到文件以便调试
-          # 注意：在 Linux Shell 中需要对参数值使用引号
-          if ! mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate "-Dexpression=project.version" -q -DforceStdout -N > version.txt; then
+          # 使用 -pl . 代替 -N：允许 Maven 加载整个 Reactor (从而找到 BOM) 但只在当前项目(Root)执行目标
+          if ! mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate "-Dexpression=project.version" -q -DforceStdout -pl . > version.txt; then
             echo "Error: Failed to get version from Maven. Re-running with debug output:"
-            mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate "-Dexpression=project.version" -DforceStdout -N
+            mvn org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate "-Dexpression=project.version" -DforceStdout -pl .
             exit 1
           fi
 
