@@ -120,11 +120,11 @@ jobs:
         run: |
           # 强制设置 GPG 终端环境
           export GPG_TTY=$(tty)
-          mvn -X -B -U \
+          mvn -B -U \
             -DskipTests=true \
             -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
             -Dgpg.pinentry-mode=loopback \
-            clean deploy
+            clean deploy -e
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_TOKEN_USERNAME }}
