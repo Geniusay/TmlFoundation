@@ -2,12 +2,6 @@ name: Release to Maven Central
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-      - develop
-      - 'release/**'
-      - 'hotfix/**'
   release:
     types: [published]
 
@@ -15,61 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  validate-version:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '11'
-          cache: maven
-
-      - name: Validate Version for Branch Type
-        run: |
-          # 获取当前分支
-          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-          echo "Current branch: $BRANCH_NAME"
-          
-          # 获取当前版本
-          VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:3.5.0:exec)
-          echo "Project version: $VERSION"
-          
-          # 检查是否SNAPSHOT版本
-          if echo "$VERSION" | grep -qi SNAPSHOT; then
-            echo "ERROR: version is SNAPSHOT. Please set a non-SNAPSHOT version before releasing."
-            exit 1
-          fi
-          
-          # 分支版本校验逻辑
-          if [[ "$BRANCH_NAME" == "develop" ]] && ! [[ "$VERSION" == *"-alpha"* ]]; then
-            echo "ERROR: develop分支的版本号必须包含 -alpha 后缀（例如：1.1.0-alpha.1）"
-            exit 1
-          fi
-          
-          if [[ "$BRANCH_NAME" == release/* ]] && ! [[ "$VERSION" == *"-beta"* ]]; then
-            echo "ERROR: release分支的版本号必须包含 -beta 后缀（例如：1.1.0-beta.1）"
-            exit 1
-          fi
-          
-          if [[ "$BRANCH_NAME" == "master" ]] && [[ "$VERSION" == *"-"* ]]; then
-            echo "ERROR: master分支的版本号必须是正式版本，不能包含 -alpha 或 -beta 后缀"
-            exit 1
-          fi
-          
-          if [[ "$BRANCH_NAME" == hotfix/* ]] && [[ "$VERSION" == *"-"* ]]; then
-            echo "ERROR: hotfix分支的版本号必须是正式版本，不能包含 -alpha 或 -beta 后缀"
-            exit 1
-          fi
-          
-          echo "Version validation passed for branch: $BRANCH_NAME"
-
   publish:
-    needs: validate-version
     runs-on: ubuntu-latest
 
     steps:
